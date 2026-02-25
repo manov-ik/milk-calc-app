@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
 from app.database import engine, Base
-from routes import milk
+from app.routes import milk
 
 app = FastAPI()
 
