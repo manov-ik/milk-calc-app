@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
-from database import engine, Base
+from app.database import engine, Base
 from routes import milk
 
 app = FastAPI()
@@ -12,7 +12,7 @@ Base.metadata.create_all(bind=engine)
 # 2️⃣ Enable CORS (for React frontend)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173"],  # your React dev server    allow_credentials=True,
+    allow_origins=["*"], 
     allow_methods=["*"],
     allow_headers=["*"],
 )

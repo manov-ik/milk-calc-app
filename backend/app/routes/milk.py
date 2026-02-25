@@ -1,13 +1,11 @@
-# app/routes/milk.py
-
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from datetime import date
 import calendar
 
-from database import get_db
-from models import MilkEntry, MilkPrice
-from backend.app.schemas import ConsolidateResponseSchema, MilkMonthCreateSchema, MilkMonthResponseSchema
+from app.database import get_db
+from app.models import MilkEntry, MilkPrice
+from app.schemas import ConsolidateResponseSchema, MilkMonthCreateSchema, MilkMonthResponseSchema
 
 router = APIRouter()
 
