@@ -7,7 +7,7 @@ import calendar
 
 from database import get_db
 from models import MilkEntry, MilkPrice
-from schemas import ConsolidateResponseSchema, MilkMonthCreateSchema, MilkMonthResponseSchema
+from backend.app.schemas import ConsolidateResponseSchema, MilkMonthCreateSchema, MilkMonthResponseSchema
 
 router = APIRouter()
 
