@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import DailyInput from "../components/DailyInput";
+import DailyInput from "../components/dailyInput";
 
 export default function EntryPage() {
   const todayDate = new Date();
