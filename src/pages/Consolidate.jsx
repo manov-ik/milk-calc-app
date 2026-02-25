@@ -17,7 +17,7 @@ export default function Consolidate() {
   const [chartData, setChartData] = useState([]);
   const [loading, setLoading] = useState(true);
   const API_BASE = import.meta.env.VITE_API_URL;
-  console.log("API_BASE:", API_BASE);
+  // console.log("API_BASE:", API_BASE);
 
   useEffect(() => {
     const fetchAll = async () => {
