@@ -132,7 +132,7 @@ export default function Consolidate() {
                   <p className="text-xl font-semibold text-gray-800">
                     {data.total_milk}
                     <span className="text-sm font-normal text-gray-400 ml-1">
-                      ml
+                      L
                     </span>
                   </p>
                 </div>
