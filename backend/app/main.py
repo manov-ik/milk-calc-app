@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
 from app.database import engine, Base
-from app.routes import milk
+from app.routes import milk, auth
 
 app = FastAPI()
 
@@ -23,6 +23,11 @@ app.include_router(
     milk.router,
     prefix="/api/milk",
     tags=["Milk"]
+)
+app.include_router(
+    auth.router,
+    prefix="/api/auth",
+    tags=["Auth"]
 )
 
 if __name__ == "__main__":

@@ -5,6 +5,7 @@ export default function EntryPage() {
   const todayDate = new Date();
   const currentDay = todayDate.getDate();
   const API_BASE = import.meta.env.VITE_API_URL;
+  const userId = localStorage.getItem("user_id");
 
   const [selectedYear, setSelectedYear] = useState(todayDate.getFullYear());
   const [selectedMonth, setSelectedMonth] = useState(todayDate.getMonth());
@@ -21,7 +22,7 @@ export default function EntryPage() {
       setLoading(true);
       try {
         const response = await fetch(
-          `${API_BASE}/api/milk/month?user_id=1&year=${selectedYear}&month=${selectedMonth + 1}`,
+          `${API_BASE}/api/milk/month?user_id=${userId}&year=${selectedYear}&month=${selectedMonth + 1}`,
         );
         const data = await response.json();
         if (data.daily_entries?.length > 0) {
@@ -67,7 +68,7 @@ export default function EntryPage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          user_id: 1,
+          user_id: Number(userId),
           year: selectedYear,
           month: selectedMonth + 1,
           milk_price: milkPrice,
@@ -139,8 +140,8 @@ export default function EntryPage() {
                 onChange={(e) => setSelectedYear(Number(e.target.value))}
                 className="text-xs text-gray-600 bg-gray-50 border border-gray-200 rounded px-2 py-1 focus:outline-none focus:border-gray-400"
               >
-                {[0, 1, 2, 3].map((i) => {
-                  const year = todayDate.getFullYear() - i;
+                {Array.from({ length: 13 }, (_, i) => {
+                  const year = todayDate.getFullYear() + 2 - i;
                   return (
                     <option key={year} value={year}>
                       {year}

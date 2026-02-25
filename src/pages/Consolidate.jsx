@@ -15,8 +15,10 @@ export default function Consolidate() {
   const [selectedMonth, setSelectedMonth] = useState(today.getMonth());
   const [data, setData] = useState(null);
   const [chartData, setChartData] = useState([]);
+  const [rawEntries, setRawEntries] = useState([]);
   const [loading, setLoading] = useState(true);
   const API_BASE = import.meta.env.VITE_API_URL;
+  const userId = localStorage.getItem("user_id");
   // console.log("API_BASE:", API_BASE);
 
   useEffect(() => {
@@ -25,10 +27,10 @@ export default function Consolidate() {
       try {
         const [consolidateRes, monthRes] = await Promise.all([
           fetch(
-            `${API_BASE}/api/milk/consolidate?user_id=1&year=${selectedYear}&month=${selectedMonth + 1}`,
+            `${API_BASE}/api/milk/consolidate?user_id=${userId}&year=${selectedYear}&month=${selectedMonth + 1}`,
           ),
           fetch(
-            `${API_BASE}/api/milk/month?user_id=1&year=${selectedYear}&month=${selectedMonth + 1}`,
+            `${API_BASE}/api/milk/month?user_id=${userId}&year=${selectedYear}&month=${selectedMonth + 1}`,
           ),
         ]);
 
@@ -39,7 +41,9 @@ export default function Consolidate() {
 
         setData(consolidate);
 
-        const daily = (month.daily_entries || []).map((e) => ({
+        const entries = month.daily_entries || [];
+        setRawEntries(entries);
+        const daily = entries.map((e) => ({
           day: e.day,
           total: (e.fn || 0) + (e.an || 0),
         }));
@@ -59,6 +63,21 @@ export default function Consolidate() {
     data && Object.keys(data.quantity_frequency).length > 0
       ? Math.max(...Object.values(data.quantity_frequency))
       : 1;
+
+  const activeDays = rawEntries.filter((e) => (e.fn || 0) + (e.an || 0) > 0);
+  const totalMorning = rawEntries.reduce((s, e) => s + (e.fn || 0), 0);
+  const totalEvening = rawEntries.reduce((s, e) => s + (e.an || 0), 0);
+  const avgDaily =
+    activeDays.length > 0
+      ? Math.round((totalMorning + totalEvening) / activeDays.length)
+      : 0;
+  const topDay = rawEntries.reduce(
+    (best, e) => {
+      const t = (e.fn || 0) + (e.an || 0);
+      return t > best.total ? { day: e.day, total: t } : best;
+    },
+    { day: null, total: 0 },
+  );
 
   const CustomTooltip = ({ active, payload, label }) => {
     if (active && payload?.length) {
@@ -101,8 +120,8 @@ export default function Consolidate() {
               onChange={(e) => setSelectedYear(Number(e.target.value))}
               className="text-xs text-gray-600 bg-gray-50 border border-gray-200 rounded px-2 py-1 focus:outline-none focus:border-gray-400"
             >
-              {Array.from({ length: 5 }, (_, i) => {
-                const year = today.getFullYear() - i;
+              {Array.from({ length: 13 }, (_, i) => {
+                const year = today.getFullYear() + 2 - i;
                 return (
                   <option key={year} value={year}>
                     {year}
@@ -145,10 +164,44 @@ export default function Consolidate() {
               </div>
 
               {/* Line Chart */}
+              
+
+              {/* Frequency */}
+              <p className="text-xs font-semibold tracking-widest text-gray-400 uppercase mb-3">
+                Quantity Breakdown
+              </p>
+
+              {Object.keys(data.quantity_frequency).length === 0 ? (
+                <p className="text-xs text-gray-400">
+                  No entries for this month.
+                </p>
+              ) : (
+                <div className="flex flex-col gap-3">
+                  {Object.entries(data.quantity_frequency)
+                    .sort((a, b) => Number(a[0]) - Number(b[0]))
+                    .map(([qty, count]) => (
+                      <div key={qty} className="flex items-center gap-3">
+                        <span className="text-xs text-gray-500 w-14 shrink-0">
+                          {qty} ml
+                        </span>
+                        <div className="flex-1 bg-gray-100 rounded-full h-1.5">
+                          <div
+                            className="bg-gray-700 h-1.5 rounded-full transition-all duration-500"
+                            style={{ width: `${(count / maxCount) * 100}%` }}
+                          />
+                        </div>
+                        <span className="text-xs text-gray-400 w-12 text-right shrink-0">
+                          {count}x
+                        </span>
+                      </div>
+                    ))}
+                </div>
+              )}
+
               {chartData.length > 0 && (
-                <div className="mb-6">
+                <div className="mt-6">
                   <p className="text-[10px] font-semibold tracking-widest text-gray-400 uppercase mb-3">
-                    Daily Intake
+                    Daily Total
                   </p>
                   <ResponsiveContainer width="100%" height={140}>
                     <LineChart
@@ -186,35 +239,33 @@ export default function Consolidate() {
                 </div>
               )}
 
-              {/* Frequency */}
-              <p className="text-xs font-semibold tracking-widest text-gray-400 uppercase mb-3">
-                Quantity Breakdown
-              </p>
-
-              {Object.keys(data.quantity_frequency).length === 0 ? (
-                <p className="text-xs text-gray-400">
-                  No entries for this month.
-                </p>
-              ) : (
-                <div className="flex flex-col gap-3">
-                  {Object.entries(data.quantity_frequency)
-                    .sort((a, b) => Number(a[0]) - Number(b[0]))
-                    .map(([qty, count]) => (
-                      <div key={qty} className="flex items-center gap-3">
-                        <span className="text-xs text-gray-500 w-14 shrink-0">
-                          {qty} ml
-                        </span>
-                        <div className="flex-1 bg-gray-100 rounded-full h-1.5">
-                          <div
-                            className="bg-gray-700 h-1.5 rounded-full transition-all duration-500"
-                            style={{ width: `${(count / maxCount) * 100}%` }}
-                          />
-                        </div>
-                        <span className="text-xs text-gray-400 w-12 text-right shrink-0">
-                          {count}x
-                        </span>
-                      </div>
-                    ))}
+              {/* Extra Stats */}
+              {activeDays.length > 0 && (
+                <div className="mt-6 border-t border-gray-100 pt-5 flex flex-col gap-3">
+                  <p className="text-[10px] font-semibold tracking-widest text-gray-400 uppercase mb-1">
+                    Insights
+                  </p>
+                  {[
+                    { label: "Daily Avg", value: `${avgDaily} ml` },
+                    { label: "Morning Total", value: `${totalMorning} ml` },
+                    { label: "Evening Total", value: `${totalEvening} ml` },
+                    {
+                      label: "Total Quantity",
+                      value: `${totalMorning + totalEvening} ml`
+                    },{
+                      label: "Top Day",
+                      value: topDay.day
+                        ? `Day ${topDay.day} · ${topDay.total} ml`
+                        : "—",
+                    }
+                  ].map(({ label, value }) => (
+                    <div key={label} className="flex items-center justify-between">
+                      <span className="text-xs text-gray-400">{label}</span>
+                      <span className="text-xs font-semibold text-gray-700">
+                        {value}
+                      </span>
+                    </div>
+                  ))}
                 </div>
               )}
             </>
