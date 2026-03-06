@@ -24,7 +24,8 @@ export default function DailyInput({ day, fn, an, index, handleValueUpdate }) {
             type="number"
             className="w-full bg-gray-50 border border-gray-200 rounded px-2 py-1.5 text-xs font-semibold text-gray-700 outline-none focus:border-gray-400 focus:bg-white transition-all placeholder:text-gray-300"
             placeholder="0"
-            value={fn === 0 ? "" : fn}
+            value={fn}
+            onFocus={(e) => e.target.select()}
             onChange={(e) =>
               handleValueUpdate(
                 index,
@@ -42,7 +43,8 @@ export default function DailyInput({ day, fn, an, index, handleValueUpdate }) {
             type="number"
             className="w-full bg-gray-50 border border-gray-200 rounded px-2 py-1.5 text-xs font-semibold text-gray-700 outline-none focus:border-gray-400 focus:bg-white transition-all placeholder:text-gray-300"
             placeholder="0"
-            value={an === 0 ? "" : an}
+            value={an}
+            onFocus={(e) => e.target.select()}
             onChange={(e) =>
               handleValueUpdate(
                 index,

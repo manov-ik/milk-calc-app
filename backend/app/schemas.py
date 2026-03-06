@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from typing import List
+from typing import List, Optional
 
 
 class MilkDaySchema(BaseModel):
@@ -27,3 +27,10 @@ class ConsolidateResponseSchema(BaseModel):
     total_milk: int
     total_amount: float
     quantity_frequency: dict[int, int]
+
+class MilkMonthPatchSchema(BaseModel):
+    user_id: int
+    year: int
+    month: int
+    milk_price: Optional[float] = None
+    daily_entries: List[MilkDaySchema] = []

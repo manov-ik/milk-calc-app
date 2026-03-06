@@ -5,7 +5,7 @@ import calendar
 
 from app.database import get_db
 from app.models import MilkEntry, MilkPrice
-from app.schemas import ConsolidateResponseSchema, MilkMonthCreateSchema, MilkMonthResponseSchema
+from app.schemas import ConsolidateResponseSchema, MilkMonthCreateSchema, MilkMonthPatchSchema, MilkMonthResponseSchema
 
 router = APIRouter()
 
@@ -63,6 +63,59 @@ def save_month(
         return {"message": "Month saved successfully"}
 
 
+
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.patch("/month")
+def patch_month(
+    payload: MilkMonthPatchSchema,
+    db: Session = Depends(get_db)):
+    """Upsert only the changed entries for a month (no delete-all)."""
+    try:
+        # 1️⃣ Upsert each changed daily entry
+        for entry in payload.daily_entries:
+            entry_date = date(payload.year, payload.month, entry.day)
+
+            existing = db.query(MilkEntry).filter(
+                MilkEntry.user_id == payload.user_id,
+                MilkEntry.date == entry_date
+            ).first()
+
+            if existing:
+                existing.an = entry.an
+                existing.fn = entry.fn
+            else:
+                db.add(MilkEntry(
+                    user_id=payload.user_id,
+                    date=entry_date,
+                    an=entry.an,
+                    fn=entry.fn
+                ))
+
+        # 2️⃣ Upsert milk price (only if provided)
+        if payload.milk_price is not None:
+            existing_price = db.query(MilkPrice).filter(
+                MilkPrice.user_id == payload.user_id,
+                MilkPrice.year == payload.year,
+                MilkPrice.month == payload.month
+            ).first()
+
+            if existing_price:
+                existing_price.price = payload.milk_price
+            else:
+                db.add(MilkPrice(
+                    user_id=payload.user_id,
+                    year=payload.year,
+                    month=payload.month,
+                    price=payload.milk_price
+                ))
+
+        # 3️⃣ Commit
+        db.commit()
+        return {"message": "Changes saved", "entries_updated": len(payload.daily_entries)}
 
     except Exception as e:
         db.rollback()

@@ -12,7 +12,7 @@ Base.metadata.create_all(bind=engine)
 # 2️⃣ Enable CORS (for React frontend)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["https://milk-log.netlify.app"], 
+    allow_origins=["https://milk-log.netlify.app","*"], 
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
