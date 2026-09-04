@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import {
   LineChart,
   Line,
@@ -11,8 +12,33 @@ import {
 
 export default function Consolidate() {
   const today = new Date();
-  const [selectedYear, setSelectedYear] = useState(today.getFullYear());
-  const [selectedMonth, setSelectedMonth] = useState(today.getMonth());
+  const [searchParams, setSearchParams] = useSearchParams();
+  const paramYear = searchParams.get("year");
+  const paramMonth = searchParams.get("month");
+
+  const selectedYear =
+    paramYear !== null && !isNaN(Number(paramYear))
+      ? Number(paramYear)
+      : today.getFullYear();
+  const selectedMonth =
+    paramMonth !== null && !isNaN(Number(paramMonth))
+      ? Number(paramMonth)
+      : today.getMonth();
+
+  const setSelectedYear = (year) => {
+    setSearchParams(
+      { year: String(year), month: String(selectedMonth) },
+      { replace: true }
+    );
+  };
+
+  const setSelectedMonth = (month) => {
+    setSearchParams(
+      { year: String(selectedYear), month: String(month) },
+      { replace: true }
+    );
+  };
+
   const [data, setData] = useState(null);
   const [chartData, setChartData] = useState([]);
   const [rawEntries, setRawEntries] = useState([]);
@@ -164,7 +190,6 @@ export default function Consolidate() {
               </div>
 
               {/* Line Chart */}
-              
 
               {/* Frequency */}
               <p className="text-xs font-semibold tracking-widest text-gray-400 uppercase mb-3">
@@ -251,15 +276,19 @@ export default function Consolidate() {
                     { label: "Evening Total", value: `${totalEvening} ml` },
                     {
                       label: "Total Quantity",
-                      value: `${totalMorning + totalEvening} ml`
-                    },{
+                      value: `${totalMorning + totalEvening} ml`,
+                    },
+                    {
                       label: "Top Day",
                       value: topDay.day
                         ? `Day ${topDay.day} · ${topDay.total} ml`
                         : "—",
-                    }
+                    },
                   ].map(({ label, value }) => (
-                    <div key={label} className="flex items-center justify-between">
+                    <div
+                      key={label}
+                      className="flex items-center justify-between"
+                    >
                       <span className="text-xs text-gray-400">{label}</span>
                       <span className="text-xs font-semibold text-gray-700">
                         {value}

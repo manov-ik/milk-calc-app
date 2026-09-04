@@ -1,4 +1,5 @@
 import { useEffect, useState, useRef, useCallback } from "react";
+import { useSearchParams } from "react-router-dom";
 import DailyInput from "../components/dailyInput";
 
 export default function EntryPage() {
@@ -7,8 +8,33 @@ export default function EntryPage() {
   const API_BASE = import.meta.env.VITE_API_URL;
   const userId = localStorage.getItem("user_id");
 
-  const [selectedYear, setSelectedYear] = useState(todayDate.getFullYear());
-  const [selectedMonth, setSelectedMonth] = useState(todayDate.getMonth());
+  const [searchParams, setSearchParams] = useSearchParams();
+  const paramYear = searchParams.get("year");
+  const paramMonth = searchParams.get("month");
+
+  const selectedYear =
+    paramYear !== null && !isNaN(Number(paramYear))
+      ? Number(paramYear)
+      : todayDate.getFullYear();
+  const selectedMonth =
+    paramMonth !== null && !isNaN(Number(paramMonth))
+      ? Number(paramMonth)
+      : todayDate.getMonth();
+
+  const setSelectedYear = (year) => {
+    setSearchParams(
+      { year: String(year), month: String(selectedMonth) },
+      { replace: true }
+    );
+  };
+
+  const setSelectedMonth = (month) => {
+    setSearchParams(
+      { year: String(selectedYear), month: String(month) },
+      { replace: true }
+    );
+  };
+
   const [dailyInputs, setDailyInputs] = useState([]);
   const [milkPrice, setMilkPrice] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -161,12 +187,19 @@ export default function EntryPage() {
   }, [userId, API_BASE]);
 
   // ── Schedule debounced auto-save ──────────────────────────────────
-  const scheduleSave = useCallback(() => {
-    if (debounceTimer.current) clearTimeout(debounceTimer.current);
-    debounceTimer.current = setTimeout(() => {
-      autoSave();
-    }, 2500); // 2.5s after last edit — ensures last keystroke is captured
-  }, [autoSave]);
+  const scheduleSave = useCallback(
+    (immediate = false) => {
+      if (debounceTimer.current) clearTimeout(debounceTimer.current);
+      if (immediate) {
+        autoSave();
+      } else {
+        debounceTimer.current = setTimeout(() => {
+          autoSave();
+        }, 500); // 500ms after last edit for fast response
+      }
+    },
+    [autoSave],
+  );
 
   // ── Handle value updates with dirty tracking ──────────────────────
   const handleValueUpdate = (index, field, value) => {
@@ -200,12 +233,41 @@ export default function EntryPage() {
     scheduleSave();
   };
 
-  // ── Cleanup debounce timer on unmount ─────────────────────────────
+  // ── Flush uncommitted edits on unmount ────────────────────────────
   useEffect(() => {
     return () => {
       if (debounceTimer.current) clearTimeout(debounceTimer.current);
+      if (dirtyDays.current.size > 0 || isPriceDirty.current) {
+        const currentInputs = latestInputs.current;
+        const currentPrice = latestPrice.current;
+        const currentYear = latestYear.current;
+        const currentMonth = latestMonth.current;
+
+        const changedEntries = [];
+        for (const idx of dirtyDays.current) {
+          const entry = currentInputs[idx];
+          if (entry) changedEntries.push(entry);
+        }
+
+        const body = {
+          user_id: Number(userId),
+          year: currentYear,
+          month: currentMonth + 1,
+          daily_entries: changedEntries,
+        };
+        if (isPriceDirty.current) {
+          body.milk_price = currentPrice;
+        }
+
+        fetch(`${API_BASE}/api/milk/month`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(body),
+          keepalive: true,
+        }).catch(() => {});
+      }
     };
-  }, []);
+  }, [userId, API_BASE]);
 
   const totalMilk = dailyInputs.reduce(
     (sum, i) => sum + (i.an || 0) + (i.fn || 0),
@@ -289,6 +351,7 @@ export default function EntryPage() {
                 className="w-10 bg-transparent text-xs font-semibold text-gray-700 outline-none"
                 value={milkPrice}
                 onFocus={(e) => e.target.select()}
+                onBlur={() => scheduleSave(true)}
                 onChange={(e) => handlePriceChange(e.target.value)}
               />
               <span className="text-[9px] text-gray-400">/L</span>
@@ -320,6 +383,7 @@ export default function EntryPage() {
                   placeholder="0"
                   value={todayData.fn}
                   onFocus={(e) => e.target.select()}
+                  onBlur={() => scheduleSave(true)}
                   onChange={(e) =>
                     handleValueUpdate(
                       todayIndex,
@@ -339,6 +403,7 @@ export default function EntryPage() {
                   placeholder="0"
                   value={todayData.an}
                   onFocus={(e) => e.target.select()}
+                  onBlur={() => scheduleSave(true)}
                   onChange={(e) =>
                     handleValueUpdate(
                       todayIndex,
@@ -366,6 +431,7 @@ export default function EntryPage() {
                 fn={input.fn}
                 an={input.an}
                 handleValueUpdate={handleValueUpdate}
+                handleBlur={() => scheduleSave(true)}
               />
             ))}
           </div>

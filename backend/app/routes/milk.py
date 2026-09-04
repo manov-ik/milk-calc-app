@@ -192,14 +192,15 @@ def consolidate_data(
             frequency[entry.an] = frequency.get(entry.an, 0) + 1
         
     price = MilkPrice_obj.price if MilkPrice_obj else 0
-    total_amt = (sum(entry.an + entry.fn for entry in entries))/1000*price
-
+    total_milk_ml = sum(entry.an + entry.fn for entry in entries)
+    total_milk_liters = round(total_milk_ml / 1000, 2)
+    total_amt = (total_milk_ml / 1000) * price
 
     return ConsolidateResponseSchema(
         year=year,
         month=month,
         milk_price=price,
-        total_milk=sum(frequency.values()),
+        total_milk=total_milk_liters,
         total_amount=round(total_amt),
         quantity_frequency=frequency
     )

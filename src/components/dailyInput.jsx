@@ -1,4 +1,11 @@
-export default function DailyInput({ day, fn, an, index, handleValueUpdate }) {
+export default function DailyInput({
+  day,
+  fn,
+  an,
+  index,
+  handleValueUpdate,
+  handleBlur,
+}) {
   const displayDay = String(day).includes("-")
     ? String(day).split("-").pop()
     : day;
@@ -26,6 +33,7 @@ export default function DailyInput({ day, fn, an, index, handleValueUpdate }) {
             placeholder="0"
             value={fn}
             onFocus={(e) => e.target.select()}
+            onBlur={handleBlur}
             onChange={(e) =>
               handleValueUpdate(
                 index,
@@ -45,6 +53,7 @@ export default function DailyInput({ day, fn, an, index, handleValueUpdate }) {
             placeholder="0"
             value={an}
             onFocus={(e) => e.target.select()}
+            onBlur={handleBlur}
             onChange={(e) =>
               handleValueUpdate(
                 index,

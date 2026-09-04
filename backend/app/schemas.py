@@ -24,7 +24,7 @@ class ConsolidateResponseSchema(BaseModel):
     year: int
     month: int
     milk_price: float
-    total_milk: int
+    total_milk: float
     total_amount: float
     quantity_frequency: dict[int, int]
 
