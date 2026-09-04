@@ -126,7 +126,8 @@ export default function Consolidate() {
       <div className="w-full max-w-sm bg-white border border-gray-200 rounded-lg shadow-sm">
         {/* Header */}
         <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
-          <span className="text-xs font-semibold tracking-widest text-gray-400 uppercase">
+          <span className="text-xs flex items-center gap-2 font-semibold tracking-widest text-gray-400 uppercase">
+            <img src="/milk_bucket.webp" alt="Milk Bucket" className="h-6" />
             Milk Report
           </span>
           <div className="flex gap-2">
@@ -146,8 +147,8 @@ export default function Consolidate() {
               onChange={(e) => setSelectedYear(Number(e.target.value))}
               className="text-xs text-gray-600 bg-gray-50 border border-gray-200 rounded px-2 py-1 focus:outline-none focus:border-gray-400"
             >
-              {Array.from({ length: 13 }, (_, i) => {
-                const year = today.getFullYear() + 2 - i;
+              {Array.from({ length: 12 }, (_, i) => {
+                const year = today.getFullYear() + 9 - i;
                 return (
                   <option key={year} value={year}>
                     {year}

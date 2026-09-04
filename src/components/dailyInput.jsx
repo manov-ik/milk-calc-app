@@ -1,5 +1,6 @@
 export default function DailyInput({
   day,
+  dayStr,
   fn,
   an,
   index,
@@ -17,6 +18,10 @@ export default function DailyInput({
       {/* Day Badge */}
       <span className="text-xs font-semibold text-gray-400 w-6 shrink-0 text-center">
         {displayDay}
+        <br />
+        <span className="text-[10px] font-normal text-gray-400 w-6 shrink-0 text-center">
+          {dayStr}
+        </span>
       </span>
 
       <div className="w-px h-6 bg-gray-100 shrink-0" />
@@ -29,7 +34,8 @@ export default function DailyInput({
           </span>
           <input
             type="number"
-            className="w-full bg-gray-50 border border-gray-200 rounded px-2 py-1.5 text-xs font-semibold text-gray-700 outline-none focus:border-gray-400 focus:bg-white transition-all placeholder:text-gray-300"
+            className="w-full bg-gray-50 border border-gray-200 rounded px-2 py-1.5 text-xs font-semibold text-gray-700 outline-none focus:border-gray-400 focus:bg-white transition-all placeholder:text-gray-300
+             [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
             placeholder="0"
             value={fn}
             onFocus={(e) => e.target.select()}
@@ -49,7 +55,8 @@ export default function DailyInput({
           </span>
           <input
             type="number"
-            className="w-full bg-gray-50 border border-gray-200 rounded px-2 py-1.5 text-xs font-semibold text-gray-700 outline-none focus:border-gray-400 focus:bg-white transition-all placeholder:text-gray-300"
+            className="w-full bg-gray-50 border border-gray-200 rounded px-2 py-1.5 text-xs font-semibold text-gray-700 outline-none focus:border-gray-400 focus:bg-white transition-all placeholder:text-gray-300
+            [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
             placeholder="0"
             value={an}
             onFocus={(e) => e.target.select()}

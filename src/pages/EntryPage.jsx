@@ -12,6 +12,8 @@ export default function EntryPage() {
   const paramYear = searchParams.get("year");
   const paramMonth = searchParams.get("month");
 
+  const customDays = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+
   const selectedYear =
     paramYear !== null && !isNaN(Number(paramYear))
       ? Number(paramYear)
@@ -24,14 +26,14 @@ export default function EntryPage() {
   const setSelectedYear = (year) => {
     setSearchParams(
       { year: String(year), month: String(selectedMonth) },
-      { replace: true }
+      { replace: true },
     );
   };
 
   const setSelectedMonth = (month) => {
     setSearchParams(
       { year: String(selectedYear), month: String(month) },
-      { replace: true }
+      { replace: true },
     );
   };
 
@@ -284,7 +286,12 @@ export default function EntryPage() {
   const todayData = todayIndex !== -1 ? dailyInputs[todayIndex] : null;
 
   const historyData = dailyInputs
-    .map((item, index) => ({ ...item, originalIndex: index }))
+    .map((item, index) => ({
+      ...item,
+      originalIndex: index,
+      dayStr:
+        customDays[new Date(selectedYear, selectedMonth, item.day).getDay()],
+    }))
     .filter((item) => !(isCurrentMonth && item.day === currentDay));
 
   if (loading)
@@ -301,14 +308,17 @@ export default function EntryPage() {
       {/* Header */}
       <div className="bg-white border-b border-gray-200 px-5 py-4">
         <div className="max-w-sm mx-auto flex items-center justify-between">
-          <div>
-            <h1 className="text-sm font-semibold text-gray-800">MilkTrack</h1>
-            <p className="text-[10px] text-gray-400 tracking-widest uppercase mt-0.5">
-              {new Date(0, selectedMonth).toLocaleString("default", {
-                month: "long",
-              })}{" "}
-              {selectedYear}
-            </p>
+          <div className="flex gap-2">
+            {/* <img src="/milk_bucket.webp" alt="Milk Bucket" className="h-8" /> */}
+            <div>
+              <h1 className="text-sm font-semibold text-gray-800">Milk Calc</h1>
+              <p className="text-[10px] text-gray-400 tracking-widest uppercase mt-0.5">
+                {new Date(0, selectedMonth).toLocaleString("default", {
+                  month: "long",
+                })}{" "}
+                {selectedYear}
+              </p>
+            </div>
           </div>
           <div className="flex items-center gap-2">
             {/* Month / Year */}
@@ -331,8 +341,8 @@ export default function EntryPage() {
                 onChange={(e) => setSelectedYear(Number(e.target.value))}
                 className="text-xs text-gray-600 bg-gray-50 border border-gray-200 rounded px-2 py-1 focus:outline-none focus:border-gray-400"
               >
-                {Array.from({ length: 13 }, (_, i) => {
-                  const year = todayDate.getFullYear() + 2 - i;
+                {Array.from({ length: 12 }, (_, i) => {
+                  const year = todayDate.getFullYear() + 9 - i;
                   return (
                     <option key={year} value={year}>
                       {year}
@@ -342,13 +352,17 @@ export default function EntryPage() {
               </select>
             </div>
             {/* Price */}
-            <div className="flex items-center bg-gray-50 border border-gray-200 rounded px-2 py-1 gap-1">
+            <div
+              className="flex items-center bg-gray-50 border border-gray-200 rounded px-2 py-1 gap-1
+            "
+            >
               <span className="text-[10px] text-gray-400 uppercase tracking-widest">
                 ₹
               </span>
               <input
                 type="number"
-                className="w-10 bg-transparent text-xs font-semibold text-gray-700 outline-none"
+                className="w-10 bg-transparent text-xs font-semibold text-gray-700 outline-none 
+                 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                 value={milkPrice}
                 onFocus={(e) => e.target.select()}
                 onBlur={() => scheduleSave(true)}
@@ -369,7 +383,7 @@ export default function EntryPage() {
                 Today
               </span>
               <span className="text-[10px] font-semibold text-gray-400">
-                Day {todayData.day}
+                {customDays[todayDate.getDay()]} • Day {todayData.day}
               </span>
             </div>
             <div className="p-4 grid grid-cols-2 gap-3">
@@ -379,7 +393,8 @@ export default function EntryPage() {
                 </p>
                 <input
                   type="number"
-                  className="w-full bg-gray-50 border border-gray-200 rounded px-3 py-2 text-sm font-semibold text-gray-800 outline-none focus:border-gray-400 focus:bg-white transition-all placeholder:text-gray-300"
+                  className="w-full bg-gray-50 border border-gray-200 rounded px-3 py-2 text-sm font-semibold text-gray-800 outline-none focus:border-gray-400 focus:bg-white transition-all placeholder:text-gray-300
+                   [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                   placeholder="0"
                   value={todayData.fn}
                   onFocus={(e) => e.target.select()}
@@ -399,7 +414,8 @@ export default function EntryPage() {
                 </p>
                 <input
                   type="number"
-                  className="w-full bg-gray-50 border border-gray-200 rounded px-3 py-2 text-sm font-semibold text-gray-800 outline-none focus:border-gray-400 focus:bg-white transition-all placeholder:text-gray-300"
+                  className="w-full bg-gray-50 border border-gray-200 rounded px-3 py-2 text-sm font-semibold text-gray-800 outline-none focus:border-gray-400 focus:bg-white transition-all placeholder:text-gray-300
+                   [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                   placeholder="0"
                   value={todayData.an}
                   onFocus={(e) => e.target.select()}
@@ -428,6 +444,7 @@ export default function EntryPage() {
                 key={input.day}
                 index={input.originalIndex}
                 day={input.day}
+                dayStr={input.dayStr}
                 fn={input.fn}
                 an={input.an}
                 handleValueUpdate={handleValueUpdate}
@@ -458,8 +475,9 @@ export default function EntryPage() {
               <>
                 <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
                 <span className="text-[10px] text-gray-400 uppercase tracking-widest">
-                  Saving…
+                  Saving
                 </span>
+                <img src="/bucket.webp" alt="Bucket" className=" h-8" />
               </>
             )}
             {saveStatus === "saved" && (
@@ -468,6 +486,11 @@ export default function EntryPage() {
                 <span className="text-[10px] text-emerald-500 uppercase tracking-widest">
                   Saved
                 </span>
+                <img
+                  src="/milk_bucket.webp"
+                  alt="Milk Bucket"
+                  className="h-8"
+                />
               </>
             )}
             {saveStatus === "error" && (
@@ -476,6 +499,11 @@ export default function EntryPage() {
                 <span className="text-[10px] text-red-500 uppercase tracking-widest">
                   Error
                 </span>
+                <img
+                  src="/bucket.webp"
+                  alt="Bucket"
+                  className="rotate-180 h-8"
+                />
               </>
             )}
           </div>

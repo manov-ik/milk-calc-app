@@ -13,6 +13,7 @@ Base.metadata.create_all(bind=engine)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
+        "http://localhost:5173",
         "https://milk-log.netlify.app",
     ], 
     allow_credentials=True,

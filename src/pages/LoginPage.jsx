@@ -40,9 +40,13 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
       <div className="bg-white border border-gray-200 rounded-xl shadow-sm w-full max-w-sm p-8">
-        <h1 className="text-xl font-bold text-gray-900 mb-1">
-          {mode === "login" ? "Sign in" : "Create account"}
-        </h1>
+        <div className="flex items-center justify-between gap-2">
+          <h1 className="text-xl font-bold text-gray-900 mb-1">
+            {mode === "login" ? "Sign in" : "Create account"}
+          </h1>
+          <img src="/milk_bucket.webp" alt="Milk Bucket" className="h-8" />
+
+        </div>
         <p className="text-xs text-gray-400 mb-6">Milk Calculator</p>
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
